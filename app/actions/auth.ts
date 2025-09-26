@@ -65,10 +65,12 @@ export const signup = async (data: UserData): Promise<AuthResponse> => {
     await User.create({ ...data, password: hashedPassword });
     return { success: "User created successfully" };
   } catch (err: unknown) {
-    const errorMessage = err instanceof Error ? err.message : "Error creating user";
-    return { error: "Error creating user", details: errorMessage };
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("SIGNUP_ERROR:", msg);
+    return { error: "Error creating user", details: msg };
   }
 };
+
 
 // تسجيل الدخول
 export const login = async (data: { email: string; password: string }): Promise<AuthResponse> => {
