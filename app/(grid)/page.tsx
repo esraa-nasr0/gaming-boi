@@ -1,6 +1,7 @@
 import Hero from "../components/Hero";
 import { getGamesByIds, searchGames } from "../api/api";
 import GamesSlider from "../components/GamesSlider";
+import { Game } from "../types/game";
 
 export default async function Home() {
   const data = await searchGames("action", 1, [], 20, 3600);
