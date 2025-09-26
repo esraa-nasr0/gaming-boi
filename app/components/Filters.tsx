@@ -5,50 +5,38 @@ import GameSkeleton from "./GameSkeleton";
 import GameCard from "./GameCard";
 import Empty from "./defaults/Empty";
 import { PaginationCustom } from "./PaginationCustom";
-import { Game } from "../types/game";
+import type { Game } from "../types/game";
 
-// Genre type
+// نوع الـ Genre بدل any
 interface Genre {
   id: number;
   name: string;
   slug?: string;
 }
 
-// props
-interface FiltersProps {
-  generes: Genre[];
+// شكل الداتا الراجعة من الهوك (بس اللي بنحتاجه هنا)
+interface GamesPayload {
+  count?: number;
+  results?: Game[];
 }
 
-// شكل الاستجابة من الهوك
-interface GamesListResponse {
-  data?: {
-    count?: number;
-    results?: Game[];
-  };
-}
-
-const Filters = ({ generes }: FiltersProps) => {
+const Filters = ({ generes }: { generes: Genre[] }) => {
   const [page, setPage] = useState(1);
   const [activeGenres, setActiveGenres] = useState<number[]>([]);
 
-  // قوّي أنواع الهوك عشان TypeScript يفهم شكل الداتا
-  const { data: games, isLoading } = useGetGames({
+  const { games, isLoading } = useGetGames({
     page,
     filters:
       activeGenres.length > 0
-        ? [
-            {
-              filterName: "genres" as const,
-              option: activeGenres.join(","),
-            },
-          ]
+        ? [{ filterName: "genres", option: activeGenres.join(",") }]
         : [],
-  }) as { data?: GamesListResponse["data"]; isLoading: boolean };
+  }) as { games?: { data?: GamesPayload }; isLoading: boolean };
 
-  const results: Game[] = games?.results ?? [];
-  const totalPages = Math.ceil((games?.count ?? 0) / 21);
+  const results = games?.data?.results ?? [];
+  const totalPages = Math.max(1, Math.ceil((games?.data?.count ?? 0) / 21));
 
-  const handleGenreClick = (genreId: number) => {
+  // بدل التيرنري داخل onClick (يمنع no-unused-expressions)
+  const toggleGenre = (genreId: number) => {
     setActiveGenres((prev) =>
       prev.includes(genreId)
         ? prev.filter((id) => id !== genreId)
@@ -65,11 +53,7 @@ const Filters = ({ generes }: FiltersProps) => {
             <GameSkeleton number={21} />
           ) : results.length > 0 ? (
             results.map((game) => (
-              <GameCard
-                key={game.id}
-                game={game}
-                wishlist={false}
-              />
+              <GameCard key={game.id} game={game} wishlist={false} />
             ))
           ) : (
             <Empty message="Sorry, no games found in this page" />
@@ -77,13 +61,18 @@ const Filters = ({ generes }: FiltersProps) => {
         </div>
       </div>
 
-      {/* الفلاتر */}
+      {/* الفلاتر على اليمين */}
       <div className="col-span-12 lg:col-span-3 order-2 lg:order-2">
-        <div className="flex flex-row-reverse lg:flex-col gap-2 bg-gradient-to-br from-zinc-900/80 to-zinc-800/40 backdrop-blur-xl shadow-lg border border-fuchsia-400/20 py-4 px-4 rounded-2xl sticky top-0">
+        <div
+          className="flex flex-row-reverse lg:flex-col gap-2 
+                     bg-gradient-to-br from-zinc-900/80 to-zinc-800/40 
+                     backdrop-blur-xl shadow-lg border border-fuchsia-400/20 
+                     py-4 px-4 rounded-2xl sticky top-0"
+        >
           {generes.map((genre) => (
             <button
               key={genre.id}
-              onClick={() => handleGenreClick(genre.id)}
+              onClick={() => toggleGenre(genre.id)}
               className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-300 ${
                 activeGenres.includes(genre.id)
                   ? "bg-fuchsia-600 text-white shadow-md"
