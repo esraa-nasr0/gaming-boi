@@ -73,12 +73,12 @@ function Login() {
         </form>
       </Form>
 
-      <p
-        className="text-gray-400 text-center mt-4"
-        onClick={() => (window.location.href = "/signup")}
-      >
-        Don't have an account?{" "}
-        <span className="text-fuchsia-500 cursor-pointer hover:underline">
+      <p className="text-gray-400 text-center mt-4">
+        Don&apos;t have an account?{" "}
+        <span 
+          className="text-fuchsia-500 cursor-pointer hover:underline"
+          onClick={() => (window.location.href = "/signup")}
+        >
           Sign Up
         </span>
       </p>

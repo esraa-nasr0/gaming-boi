@@ -6,18 +6,51 @@ import GameCard from "./GameCard";
 import Empty from "./defaults/Empty";
 import { PaginationCustom } from "./PaginationCustom";
 
-const Filters = ({ generes }: { generes: any[] }) => {
+// تعريف نوع الجنس (Genre)
+interface Genre {
+  id: number;
+  name: string;
+  slug?: string;
+}
+
+// تعريف نوع اللعبة (Game)
+interface Game {
+  id: number;
+  name: string;
+  background_image?: string;
+  rating?: number;
+  // أضف الخصائص الأخرى التي يتوقعها مكون GameCard
+}
+
+interface FiltersProps {
+  generes: Genre[];
+}
+
+const Filters = ({ generes }: FiltersProps) => {
   const [page, setPage] = useState(1);
   const [activeGenres, setActiveGenres] = useState<number[]>([]);
-  const { games, isLoading } = useGetGames({
+  
+  // تأكد من أن useGetGames يقبل الخصائص بشكل صحيح
+  const { data: games, isLoading } = useGetGames({
     page,
-    filters:
-      activeGenres.length > 0
-        ? [{ filterName: "genres", option: activeGenres?.join(",") }]
-        : [],
+    filters: activeGenres.length > 0 ? [
+      { 
+        filterName: "genres" as const, 
+        option: activeGenres.join(",") 
+      }
+    ] : [],
   });
 
-  const totalPages = Math.ceil(games?.data.count / 21);
+  const totalPages = Math.ceil((games?.data?.count || 0) / 21);
+
+  // دالة معالجة النقر على الجنس
+  const handleGenreClick = (genreId: number) => {
+    setActiveGenres(prev => 
+      prev.includes(genreId) 
+        ? prev.filter(id => id !== genreId)
+        : [...prev, genreId]
+    );
+  };
 
   return (
     <div className="grid grid-cols-12 gap-6">
@@ -26,9 +59,14 @@ const Filters = ({ generes }: { generes: any[] }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {isLoading ? (
             <GameSkeleton number={21} />
-          ) : games?.data.results.length > 0 ? (
-            games?.data.results.map((game: Game) => (
-              <GameCard screenBig={false} wishlist key={game.id} game={game} />
+          ) : games?.data?.results && games.data.results.length > 0 ? (
+            games.data.results.map((game: Game) => (
+              <GameCard 
+                screenBig={false} 
+                wishlist={false}
+                key={game.id} 
+                game={game} 
+              />
             ))
           ) : (
             <Empty message="Sorry, no games found in this page" />
@@ -44,20 +82,16 @@ const Filters = ({ generes }: { generes: any[] }) => {
                      backdrop-blur-xl shadow-lg border border-fuchsia-400/20 
                      py-4 px-4 rounded-2xl sticky top-0"
         >
-          {generes.map((genre: any, i: number) => (
+          {generes.map((genre: Genre) => (
             <button
-              onClick={() => {
-                activeGenres.includes(genre.id)
-                  ? setActiveGenres(activeGenres.filter((id) => id !== genre.id))
-                  : setActiveGenres([...activeGenres, genre.id]);
-              }}
+              onClick={() => handleGenreClick(genre.id)}
               className={`px-3 py-1.5 text-sm font-medium rounded-lg transition-all duration-300
                 ${
                   activeGenres.includes(genre.id)
                     ? "bg-fuchsia-600 text-white shadow-md"
                     : "bg-zinc-800/50 text-gray-300 hover:bg-zinc-700 hover:text-white"
                 }`}
-              key={i}
+              key={genre.id}
             >
               {genre.name}
             </button>

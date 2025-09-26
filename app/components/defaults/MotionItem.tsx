@@ -1,6 +1,12 @@
 "use client";
 import React from "react";
 import { motion } from "framer-motion";
+import type { MotionProps } from "framer-motion";
+
+type MotionItemProps = Omit<MotionProps, "className" | "children"> & {
+  children: React.ReactNode;
+  className?: string;
+};
 
 const MotionItem = ({
   children,
@@ -9,24 +15,16 @@ const MotionItem = ({
   animate,
   whileInView,
   exit,
-  transition, // أضف هذا
-}: {
-  children: React.ReactNode;
-  className?: string;
-  initial?: any;
-  animate?: any;
-  whileInView?: any;
-  exit?: any;
-  transition?: any; // وأضف النوع هنا
-}) => {
+  transition,
+}: MotionItemProps) => {
   return (
     <motion.div
       initial={initial}
       exit={exit}
       animate={animate}
       whileInView={whileInView}
-      transition={transition} // واستخدمه هنا
-      className={`${className || ""}`}
+      transition={transition}
+      className={className || ""}
     >
       {children}
     </motion.div>

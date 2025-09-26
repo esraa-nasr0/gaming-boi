@@ -1,8 +1,21 @@
 "use client";
 
-import { getUser } from "@/app/actions/auth";
 import { getGamesByIds, searchGames } from "@/app/api/api";
 import { useQuery } from "@tanstack/react-query";
+
+// تعريف أنواع البيانات
+interface Filter {
+  filterName: string;
+  option: string;
+}
+
+interface UseGetGamesParams {
+  query?: string;
+  page?: number;
+  pageSize?: number;
+  filters?: Filter[];
+  isDisabled?: boolean;
+}
 
 export const useGetUser = () => {
   const { data: user, isLoading } = useQuery({
@@ -23,13 +36,11 @@ export const useGetUser = () => {
 
 export const useGetGamesWithIds = (ids: string[]) => {
   const { data: games, isLoading } = useQuery({
-    queryKey: [`games-${ids}`],
+    queryKey: [`games-${ids.join("-")}`],
     queryFn: () => getGamesByIds(ids),
   });
   return { games, isLoading };
 };
-
-
 
 export const useGetGames = ({
   query = "",
@@ -37,14 +48,7 @@ export const useGetGames = ({
   pageSize = 21,
   filters = [],
   isDisabled = false,
-}: {
-  query?: string;
-  page?: number;
-  pageSize?: number;
-  filters?: { filterName: string; option: string }[] | any;
-  isDisabled?: boolean;
-}) => {
-  // search query ""  i am disabled when there is not query to search
+}: UseGetGamesParams) => {
   const { data: games, isLoading } = useQuery({
     queryKey: [`games-${page}-${JSON.stringify(filters)}-${query}`],
     queryFn: async () => await searchGames(query, page, filters, pageSize),

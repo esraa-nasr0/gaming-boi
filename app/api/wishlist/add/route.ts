@@ -16,7 +16,8 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json(res);
-  } catch (error: any) {
+  } catch (error) {
+    console.error("Wishlist add error:", error);
     return NextResponse.json({ error: "Server error" }, { status: 500 });
   }
 }

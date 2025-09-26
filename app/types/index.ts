@@ -1,4 +1,4 @@
-interface Game {
+export interface Game {
   id: number;
   slug: string;
   name: string;
@@ -17,7 +17,7 @@ interface Game {
   playtime: number;
   suggestions_count: number;
   updated: string;
-  user_game: any | null;
+  user_game: unknown | null; // بدل any
   reviews_count: number;
   saturated_color: string;
   dominant_color: string;
@@ -31,14 +31,14 @@ interface Game {
   short_screenshots: Screenshot[];
 }
 
-interface Rating {
+export interface Rating {
   id: number;
   title: string;
   count: number;
   percent: number;
 }
 
-interface AddedByStatus {
+export interface AddedByStatus {
   yet: number;
   owned: number;
   beaten: number;
@@ -47,7 +47,7 @@ interface AddedByStatus {
   playing: number;
 }
 
-interface Platform {
+export interface Platform {
   platform: {
     id: number;
     name: string;
@@ -55,7 +55,7 @@ interface Platform {
   };
 }
 
-interface ParentPlatform {
+export interface ParentPlatform {
   platform: {
     id: number;
     name: string;
@@ -63,19 +63,19 @@ interface ParentPlatform {
   };
 }
 
-interface Genre {
+export interface Genre {
   id: number;
   name: string;
   slug: string;
 }
 
-interface Store {
+export interface Store {
   id: number;
   name: string;
   slug: string;
 }
 
-interface Tag {
+export interface Tag {
   id: number;
   name: string;
   slug: string;
@@ -84,13 +84,13 @@ interface Tag {
   image_background: string;
 }
 
-interface EsrbRating {
+export interface EsrbRating {
   id: number;
   name: string;
   slug: string;
 }
 
-interface Screenshot {
+export interface Screenshot {
   id: number;
   image: string;
 }

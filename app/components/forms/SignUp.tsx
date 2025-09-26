@@ -30,7 +30,6 @@ type SignUpSchema = z.infer<typeof signUpSchema>;
 
 function SignUp() {
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: "error" | "success"; text: string } | null>(null);
 
   const form = useForm<SignUpSchema>({
     resolver: zodResolver(signUpSchema),
@@ -44,44 +43,71 @@ function SignUp() {
   });
 
   const onSubmit = async (data: z.infer<typeof signUpSchema>) => {
-  if (data.avatar) {
-    const formData = new FormData();
-    formData.append("file", data.avatar); // الصورة اللي المستخدم اختارها
-    formData.append("upload_preset", "ml_default"); // لازم كله small letters
+    setLoading(true);
+    
+    if (data.avatar) {
+      const formData = new FormData();
+      formData.append("file", data.avatar);
+      formData.append("upload_preset", "ml_default");
 
-    try {
-      const res = await fetch(
-        "https://api.cloudinary.com/v1_1/dveash0km/image/upload",
-        {
-          method: "POST",
-          body: formData,
+      try {
+        const res = await fetch(
+          "https://api.cloudinary.com/v1_1/dveash0km/image/upload",
+          {
+            method: "POST",
+            body: formData,
+          }
+        );
+        
+        if (!res.ok) {
+          const error = await res.json();
+          console.log(error);
+          toast.error("Failed to upload image");
+          setLoading(false);
+          return;
         }
-      );
-      if (!res.ok) {
-        const error = await res.json();
-        console.log(error);
-        return;
-      }
-      const uploaded = await res.json();
-      data.avatar = {
-      source_url: uploaded.secure_url, // <-- لازم يتماشى مع schema
-      public_id: uploaded.public_id,
-      };
-      const response = await signup(data);
-      if (response.success) {
+        
+        const uploaded = await res.json();
+        data.avatar = {
+          source_url: uploaded.secure_url,
+          public_id: uploaded.public_id,
+        };
+        
+        const response = await signup(data);
+        
+        if (response.success) {
           console.log(response.success);
           toast.success(response.success);
           window.location.href = "/login";
-        }else{
+        } else {
           console.error(response.error);
-              toast.error(response.error);
+          toast.error(response.error);
         }
-    } catch (error) {
-      console.error("Upload error:", error);
+      } catch (error) {
+        console.error("Upload error:", error);
+        toast.error("An error occurred during signup");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      // Handle case without avatar
+      try {
+        const response = await signup(data);
+        
+        if (response.success) {
+          toast.success(response.success);
+          window.location.href = "/login";
+        } else {
+          toast.error(response.error);
+        }
+      } catch (error) {
+        console.error("Signup error:", error);
+        toast.error("An error occurred during signup");
+      } finally {
+        setLoading(false);
+      }
     }
-  }
-};
-
+  };
 
   return (
     <div className="flex flex-col items-center justify-center min-h-[70vh] relative">
@@ -146,17 +172,6 @@ function SignUp() {
             </Button>
           </form>
         </Form>
-
-        {/* Messages */}
-        {message && (
-          <p
-            className={`text-center mt-4 ${
-              message.type === "error" ? "text-purple-400" : "text-green-400"
-            }`}
-          >
-            {message.text}
-          </p>
-        )}
 
         {/* Footer */}
         <p className="text-gray-300 text-center mt-6 text-sm">

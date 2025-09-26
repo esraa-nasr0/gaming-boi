@@ -1,8 +1,5 @@
 import Hero from "../components/Hero";
 import { getGamesByIds, searchGames } from "../api/api";
-import Image from "next/image";
-import SwiperCards from "../components/SwiperCards";
-import Link from "next/link";
 import GamesSlider from "../components/GamesSlider";
 
 export default async function Home() {

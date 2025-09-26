@@ -8,6 +8,15 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import Image from "next/image";
 
+// تعريف نوع اللعبة
+interface Game {
+  id: number;
+  name: string;
+  background_image?: string;
+  released?: string;
+  // أضف الخصائص الأخرى حسب الحاجة
+}
+
 const Search = () => {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
@@ -90,7 +99,7 @@ const Search = () => {
                 </div>
               ))
             ) : games?.data?.results?.length > 0 ? (
-              games?.data.results.map((game: any) => (
+              games.data.results.map((game: Game) => (
                 <div 
                   key={game.id} 
                   className="hover:bg-fuchsia-600/20 duration-200 border-b border-white/10 last:border-b-0"

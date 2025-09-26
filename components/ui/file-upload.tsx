@@ -185,20 +185,20 @@ export const FileUpload = ({ onChange }: { onChange?: (files: File[]) => void })
 export function GridPattern() {
   const columns = 41;
   const rows = 11;
+  
   return (
-    <div className="flex bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-neutral-950 dark:to-neutral-900 flex-shrink-0 flex-wrap justify-center items-center gap-x-px gap-y-px  scale-105">
+    <div className="flex bg-gradient-to-r from-sky-50 to-indigo-50 dark:from-neutral-950 dark:to-neutral-900 flex-shrink-0 flex-wrap justify-center items-center gap-x-px gap-y-px scale-105">
       {Array.from({ length: rows }).map((_, row) =>
         Array.from({ length: columns }).map((_, col) => {
           const index = row * columns + col;
+          const bgClass = index % 2 === 0
+            ? "bg-white/60 dark:bg-neutral-950"
+            : "bg-sky-50 dark:bg-neutral-950 shadow-[0px_0px_1px_2px_rgba(255,255,255,0.8)_inset] dark:shadow-[0px_0px_1px_2px_rgba(0,0,0,0.8)_inset]";
+          
           return (
             <div
               key={`${col}-${row}`}
-              className={`w-10 h-10 flex flex-shrink-0 rounded-[6px] ${
-  index % 2 === 0
-    ? "bg-white/60 dark:bg-neutral-950"
-    : "bg-sky-50 dark:bg-neutral-950 shadow-[0px_0px_1px_2px_rgba(255,255,255,0.8)_inset] dark:shadow-[0px_0px_1px_2px_rgba(0,0,0,0.8)_inset]"
-}`}
-
+              className={`w-10 h-10 flex flex-shrink-0 rounded-[6px] ${bgClass}`}
             />
           );
         })

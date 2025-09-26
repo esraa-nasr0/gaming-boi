@@ -4,6 +4,14 @@ import SwiperCards from "@/app/components/SwiperCards";
 import Image from "next/image";
 import React from "react";
 
+type screenshots = {
+  id: number;
+  image: string;
+  width: number;
+  height: number;
+  is_deleted: boolean;
+};
+
 const Page = async ({ params }: { params: { id: string } }) => {
   const { id } = params;
   const gameData = await getGame(id);
@@ -47,7 +55,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
         {/* السكرين شوت */}
         {screenshots.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {screenshots.map((screenshot: any, index: number) => (
+            {screenshots.map((screenshot: screenshots , index: number) => (
               <div
                 key={index}
                 className="rounded-xl overflow-hidden h-64 relative"
@@ -101,7 +109,7 @@ const Page = async ({ params }: { params: { id: string } }) => {
             <SwiperCards
               slidesPerView={1}
               className="h-full"
-              items={screenshots.map((s: any, i: number) => ({
+              items={screenshots.map((s: screenshots, i: number) => ({
                 card: (
                   <div
                     key={`screenshot-${i}`}
