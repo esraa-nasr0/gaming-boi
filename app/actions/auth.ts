@@ -73,38 +73,37 @@ export const signup = async (data: UserData): Promise<AuthResponse> => {
 
 
 // تسجيل الدخول
+// actions/auth.ts
 export const login = async (data: { email: string; password: string }): Promise<AuthResponse> => {
   try {
     await connect();
     const cookieStore = await cookies();
-    
+
     const user = await User.findOne({ email: data.email }).select("+password");
-    
-    if (!user) {
-      return { error: "User not found" };
-    }
-    
+    if (!user) return { error: "User not found" };
+
     const isMatch = await bcrypt.compare(data.password, user.password);
-    if (!isMatch) {
-      return { error: "Incorrect email or password!" };
-    }
-    
+    if (!isMatch) return { error: "Incorrect email or password!" };
+
     const userObj: UserType = JSON.parse(JSON.stringify(user));
     const token = await generateToken({ id: user._id.toString() });
-    
+
     cookieStore.set("token", token, {
       httpOnly: true,
-      maxAge: JWT_EXPIRES,
+      maxAge: 90 * 60,
       sameSite: "lax",
       path: "/",
       secure: process.env.NODE_ENV === "production",
     });
 
     return { success: "Login successful", data: { user: userObj, token } };
-  } catch {
-    return { error: "Login failed" };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.error("LOGIN_ERROR:", msg);
+    return { error: "Login failed", details: msg };
   }
 };
+
 
 // حماية الصفحات والتحقق من token
 export const protect = async (): Promise<ProtectResult> => {
