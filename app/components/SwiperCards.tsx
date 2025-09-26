@@ -13,28 +13,22 @@ export default function SwiperCards({
   items,
   paginationImge,
   className,
-  slidesPerView
+  slidesPerView,
 }: {
-  items: {
-    src: string;
-    card: ReactNode;
-  }[];
+  items: { src: string; card: ReactNode }[];
   paginationImge?: boolean;
-  className?:string;
+  className?: string;
   slidesPerView?: number;
 }) {
   return (
     <>
       <Swiper
         modules={[Navigation, Pagination, Autoplay]}
-        className={`w-[full] ${className||"h-100"}`}
+        className={`w-full ${className || "h-100"}`}  // ✅ w-full (مش w-[full])
         navigation
         pagination={{ clickable: true }}
         slidesPerView={slidesPerView || 1}
-        autoplay={{
-          delay: 3000,
-          disableOnInteraction: false,
-        }}
+        autoplay={{ delay: 3000, disableOnInteraction: false }}
         loop
         spaceBetween={20}
       >
@@ -44,15 +38,15 @@ export default function SwiperCards({
       </Swiper>
 
       {paginationImge && (
-        <div className="flex  gap-4 mt-4">
+        <div className="flex gap-4 mt-4">
           {items.map(({ src }, i) => (
-            <div key={i} className="w-full h-40 cursor-pointer hover:-translate-y-5 z-10  hover:opacity-90 duration-200 rounded-xl overflow-hidden max-w-lg relative">
-              {src && src !=="" ? <Image
-                alt="img-pagination"
-                src={src}
-                fill
-                className="object-cover rounded-lg"
-              />:null}{""}
+            <div
+              key={i}
+              className="w-full h-40 cursor-pointer hover:-translate-y-5 z-10 hover:opacity-90 duration-200 rounded-xl overflow-hidden max-w-lg relative"
+            >
+              {src ? (
+                <Image alt="img-pagination" src={src} fill sizes="200px" className="object-cover rounded-lg" />
+              ) : null}
             </div>
           ))}
         </div>

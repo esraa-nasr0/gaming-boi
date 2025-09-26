@@ -1,17 +1,22 @@
-"use client"
+"use client";
 
-import GameCard from '@/app/components/GameCard'
-import { useWishlist } from '@/app/context/wishlistContext'
-import { useGetGamesWithIds } from '@/lib/queryFunctions'
-import React from 'react'
+import GameCard from "@/app/components/GameCard";
+import { useWishlist } from "@/app/context/wishlistContext";
+import { useGetGamesWithIds } from "@/lib/queryFunctions";
+import React from "react";
+import type { Game, GameApiResponse } from "@/app/types/game";
 
 function Page() {
-  const { wishList } = useWishlist()
-  const { games, isLoading } = useGetGamesWithIds(wishList)
-  console.log(games)
+  const { wishList } = useWishlist();
+
+  // نفترض إن الهوك مرجّع نفس الأسماء دي؛ بنقوّي الأنواع هنا لتفادي any
+  const { games, isLoading } = useGetGamesWithIds(wishList) as {
+    games: GameApiResponse[];
+    isLoading: boolean;
+  };
 
   if (isLoading) {
-    return <div className="text-center py-10">Loading...</div>
+    return <div className="text-center py-10">Loading...</div>;
   }
 
   return (
@@ -25,21 +30,30 @@ function Page() {
       </h1>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-        {games?.map((game: any) => (
-          <GameCard
-            key={game.data?.id || game.id}
-            game={{
-  ...game.data,
-  short_screenshots: game.screenshots?.results || []
-}}
+        {games?.map((game: GameApiResponse) => {
+          // دمج الاستجابة بحيث نكوّن كائن Game صالح بدون any
+          const merged: Game = {
+            ...(game.data ?? ({} as Game)),
+            id: game.data?.id ?? game.id ?? 0,
+            short_screenshots:
+              game.screenshots?.results ??
+              game.data?.short_screenshots ??
+              [],
+            // خلي المنصات دايمًا مصفوفة حتى لو مش موجودة في الـ API
+            parent_platforms: game.data?.parent_platforms ?? [],
+          };
 
-            wishlist
-            screenBig={false}
-          />
-        ))}
+          return (
+            <GameCard
+              key={merged.id}
+              game={merged}
+              wishlist
+            />
+          );
+        })}
       </div>
     </div>
-  )
+  );
 }
 
-export default Page
+export default Page;

@@ -8,52 +8,58 @@ import { Skeleton } from "@/components/ui/skeleton";
 import Link from "next/link";
 import Image from "next/image";
 
-// تعريف نوع اللعبة
+// شكل العنصر
 interface Game {
   id: number;
   name: string;
   background_image?: string;
   released?: string;
-  // أضف الخصائص الأخرى حسب الحاجة
+}
+
+// شكل الاستجابة من الهوك
+interface SearchGamesResponse {
+  data?: {
+    results?: Game[];
+  };
 }
 
 const Search = () => {
   const [query, setQuery] = useState("");
   const [search, setSearch] = useState("");
-  const { games, isLoading } = useGetGames({ query: search, isDisabled: search === "" });
-  const [active, setActive] = useState(false);
+  // لو الهوك مش راجع types، قوّيها هنا بدل any
+  const { games, isLoading } = useGetGames({
+    query: search,
+    isDisabled: search === "",
+  }) as { games?: SearchGamesResponse; isLoading: boolean };
 
-  const outsideREF = useRef<HTMLDivElement | null>(null);
+  const [active, setActive] = useState(false);
+  const outsideRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if (
-        outsideREF.current &&
-        e.target instanceof Node &&
-        !outsideREF.current.contains(e.target)
-      ) {
+      if (outsideRef.current && e.target instanceof Node && !outsideRef.current.contains(e.target)) {
         setActive(false);
       }
     };
-
     window.addEventListener("click", handleClick);
     return () => window.removeEventListener("click", handleClick);
   }, []);
 
   useEffect(() => {
-    const t = setTimeout(() => {
-      setSearch(query);
-    }, 500);
+    const t = setTimeout(() => setSearch(query), 500);
     return () => clearTimeout(t);
   }, [query]);
 
+  // --- النقطة الأهم: نتائج آمنة typed ---
+  const results: Game[] = games?.data?.results ?? [];
+
   return (
     <div
-      ref={outsideREF}
+      ref={outsideRef}
       className="w-full flex relative group items-center gap-2 justify-between px-3 md:px-4 border border-input rounded-xl bg-main max-w-2xl mx-auto"
     >
       <SearchIcon className="w-4 h-4 md:w-5 md:h-5 text-fuchsia-300 flex-shrink-0" />
-      
+
       <input
         value={query}
         placeholder="Search games..."
@@ -64,7 +70,7 @@ const Search = () => {
         onFocus={() => setActive(true)}
         className="py-2 md:py-3 text-sm md:text-base w-full bg-transparent text-gray-50 border-none outline-none active:outline-none ring-0 placeholder:text-gray-400"
       />
-      
+
       {query && (
         <XIcon
           onClick={() => {
@@ -77,14 +83,10 @@ const Search = () => {
       )}
 
       <AnimatePresence>
-        {(games?.data || isLoading) && active && (
+        {(isLoading || results.length > 0) && active && (
           <MotionItem
             initial={{ opacity: 0, y: -10 }}
-            animate={{ 
-              opacity: 1, 
-              y: 0,
-              transition: { duration: 0.2 }
-            }}
+            animate={{ opacity: 1, y: 0, transition: { duration: 0.2 } }}
             exit={{ opacity: 0, y: -10 }}
             className="absolute w-full top-full z-50 bg-[#222425] rounded-xl md:rounded-2xl shadow-lg border border-white/10 max-h-[50vh] overflow-y-auto left-0 mt-1"
           >
@@ -98,10 +100,10 @@ const Search = () => {
                   </div>
                 </div>
               ))
-            ) : games?.data?.results?.length > 0 ? (
-              games.data.results.map((game: Game) => (
-                <div 
-                  key={game.id} 
+            ) : results.length > 0 ? (
+              results.map((game) => (
+                <div
+                  key={game.id}
                   className="hover:bg-fuchsia-600/20 duration-200 border-b border-white/10 last:border-b-0"
                   onClick={() => setActive(false)}
                 >

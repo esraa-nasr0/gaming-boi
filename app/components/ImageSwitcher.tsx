@@ -1,50 +1,46 @@
 "use client";
+
 import Image from "next/image";
 import React, { useEffect } from "react";
 import { motion } from "framer-motion";
 import { GoPeople } from "react-icons/go";
+import type { Game, Screenshot } from "../types/game";
 
-// تعريف أنواع البيانات
-interface GameImage {
-  image: string;
-  id?: number;
-}
-
-interface Game {
-  id: number;
-  name: string;
-  released: string;
-  reviews_count: number;
-}
+type GameWithCounts = Game & { reviews_count?: number };
 
 interface ImageSwitcherProps {
-  images: GameImage[];
-  game: Game;
+  images: Screenshot[];   // [{ id, image }]
+  game: GameWithCounts;   // نفس Game المستخدم في GameCard
 }
 
 const ImageSwitcher = ({ images, game }: ImageSwitcherProps) => {
   const [activeIndex, setActiveIndex] = React.useState(0);
-  
+  const len = images?.length ?? 0;
+
   useEffect(() => {
+    if (!len) return;
     const interval = setInterval(() => {
-      setActiveIndex((prevIndex) => (prevIndex + 1) % (images?.length || 1));
+      setActiveIndex((prev) => (prev + 1) % len);
     }, 2000);
-    
     return () => clearInterval(interval);
-  }, [images?.length]);
+  }, [len]);
+
+  const reviewCount = game.reviews_count ?? game.ratings_count ?? 0;
 
   return (
     <div className="flex flex-col gap-4 py-3 items-center px-6 rounded-xl bg-main overflow-hidden">
       <div className="flex items-center gap-2 justify-between w-full">
         <h1 className="text-base text-white">{game.name}</h1>
-        <p className="text-xs text-muted-foreground mt-1">Released {game.released}</p>
+        <p className="text-xs text-muted-foreground mt-1">
+          Released {game.released ?? "-"}
+        </p>
       </div>
-      
+
       <div className="w-80 h-36 rounded-xl overflow-hidden relative">
-        {Array.isArray(images) && images.length > 0 ? (
-          images.map((image, index) => (
+        {len > 0 ? (
+          images.map((img, index) => (
             <motion.div
-              key={image.id || index}
+              key={img.id ?? index}
               initial={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
               animate={{ opacity: activeIndex === index ? 1 : 0 }}
@@ -53,7 +49,8 @@ const ImageSwitcher = ({ images, game }: ImageSwitcherProps) => {
             >
               <Image
                 fill
-                src={image.image}
+                sizes="320px"
+                src={img.image}
                 alt={`${game.name} screenshot ${index + 1}`}
                 className="object-cover"
                 priority={index === 0}
@@ -66,10 +63,10 @@ const ImageSwitcher = ({ images, game }: ImageSwitcherProps) => {
           </div>
         )}
       </div>
-      
+
       <p className="text-sm flex items-center gap-2 self-start text-muted-foreground mt-1">
         <GoPeople />
-        Review count {game.reviews_count}
+        Reviews {reviewCount}
       </p>
     </div>
   );

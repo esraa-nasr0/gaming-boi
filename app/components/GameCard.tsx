@@ -1,3 +1,5 @@
+"use client";
+
 import { HoverCard, HoverCardTrigger, HoverCardContent } from "@/components/ui/hover-card";
 import Image from "next/image";
 import Link from "next/link";
@@ -5,8 +7,17 @@ import React from "react";
 import { FaPlaystation, FaXbox, FaSteam } from "react-icons/fa";
 import AddToWishList from "./AddToWishList";
 import ImageSwitcher from "./ImageSwitcher";
+import type { Game } from "../types/game";
 
-const GameCard = ({ game, wishlist, screenBig = false }: { game: Game; wishlist?: boolean; screenBig: boolean }) => {
+const GameCard = ({ game, wishlist }: { game: Game; wishlist?: boolean }) => {
+  const platforms = game.parent_platforms ?? [];
+  const screenshots = game.short_screenshots ?? [];
+
+  // لو مفيش صورة من الـ API، استخدمنا placeholder بسيط (data URI شفافة)
+  const bgSrc =
+    game.background_image ??
+    "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==";
+
   return (
     <HoverCard>
       <div
@@ -24,9 +35,11 @@ const GameCard = ({ game, wishlist, screenBig = false }: { game: Game; wishlist?
               <div className="w-full h-64 relative overflow-hidden">
                 <Image
                   className="object-cover group-hover:scale-110 transition-transform duration-700 ease-out"
-                  src={game.background_image}
-                  alt={game.name}
+                  src={bgSrc}
+                  alt={game.name ?? "Game image"}
                   fill
+                  sizes="100vw"
+                  priority={false}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
               </div>
@@ -42,7 +55,7 @@ const GameCard = ({ game, wishlist, screenBig = false }: { game: Game; wishlist?
 
               {/* المنصات */}
               <div className="mt-2 flex items-center gap-2 px-4 text-gray-300">
-                {game.parent_platforms.map((platform, i) => (
+                {platforms.map((platform, i) => (
                   <p key={`platform-${platform.platform.id}-${i}`} className="text-lg">
                     {platform.platform.slug === "pc" ? (
                       <FaSteam className="hover:text-white transition-colors duration-300" />
@@ -59,11 +72,11 @@ const GameCard = ({ game, wishlist, screenBig = false }: { game: Game; wishlist?
         </HoverCardTrigger>
 
         {/* زرار الـ Wishlist */}
-        {wishlist && (
+        {wishlist ? (
           <div className="absolute top-3 left-3 z-10 text-white">
             <AddToWishList plus gameId={game.id.toString()} />
           </div>
-        )}
+        ) : null}
       </div>
 
       <HoverCardContent
@@ -71,10 +84,10 @@ const GameCard = ({ game, wishlist, screenBig = false }: { game: Game; wishlist?
         className="w-full bg-gradient-to-br from-zinc-900/90 to-zinc-800/60 
                    backdrop-blur-xl rounded-3xl shadow-lg border border-fuchsia-400/20"
       >
-      {game.short_screenshots && (
-  <ImageSwitcher game={game} images={game.short_screenshots} />
-)}
-     </HoverCardContent>
+        {screenshots.length > 0 ? (
+          <ImageSwitcher game={game} images={screenshots} />
+        ) : null}
+      </HoverCardContent>
     </HoverCard>
   );
 };
