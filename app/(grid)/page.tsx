@@ -29,7 +29,7 @@ export default async function Home() {
       <GamesSlider title="Top Games For PS5" games={ps5.data.results}/>
       <GamesSlider title="Top Games " games={games}/>
       <GamesSlider big slidesPerView={2} title="PLAYSTATION EXCLUSIVES" games={customeGame.map((game)=> game.data)}/>
-        <GamesSlider slidesPerView={4} title="TOP PC GAMES" games={pc.data.results}/>
+      <GamesSlider  title="TOP PC GAMES" games={pc.data.results}/>
     </main>
   );
 }
